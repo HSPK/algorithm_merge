@@ -28,6 +28,8 @@ private slots:
 
     void on_pb_back_clicked();
 
+    void on_pb_sort_clicked();
+
 private:
     Ui::MainWindow *ui;
     int A[100];
@@ -39,7 +41,7 @@ private:
     struct {
         int data[1000];
         int top;
-    } pos_stk;
+    } pos_stk_a, pos_stk_b;
     void randomAB();
     void updateData();
     void resetData();

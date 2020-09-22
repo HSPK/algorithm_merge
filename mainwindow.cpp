@@ -38,8 +38,9 @@ void MainWindow::updateData() {
 
 void MainWindow::resetData() {
     n_a = n_b = n_c = 0;
-    memset(pos_stk.data, 0, sizeof(pos_stk.data));
-    pos_stk.top = -1;
+    memset(pos_stk_a.data, 0, sizeof(pos_stk_a.data));
+    memset(pos_stk_b.data, 0, sizeof(pos_stk_b.data));
+    pos_stk_a.top = pos_stk_b.top = -1;
     memset(A, 0, sizeof(A));
     memset(B, 0, sizeof(B));
     memset(C, 0, sizeof(C));
@@ -60,8 +61,10 @@ void MainWindow::randomAB() {
     srand(time(NULL));
     for (int i = 0; i < n_a; i++) A[i] = rand() % (max - min + 1) + min;
     for (int j = 0; j < n_b; j++) B[j] = rand() % (max - min + 1) + min;
-    std::qsort(A, n_a, sizeof(int), cmp);
-    std::qsort(B, n_b, sizeof(int), cmp);
+    if (ui->cb_sort->checkState() == Qt::Checked) {
+        std::qsort(A, n_a, sizeof(int), cmp);
+        std::qsort(B, n_b, sizeof(int), cmp);
+    }
     updateData();
 }
 
@@ -108,9 +111,9 @@ int MainWindow::insertSort(int *a, int size, int data) {
 void MainWindow::insertNum() {
     int tmp = ui->te_input->text().toInt();
     if (ui->rb_a->isChecked()) {
-        pos_stk.data[++pos_stk.top] = insertSort(A, n_a++, tmp);
+        pos_stk_a.data[++pos_stk_a.top] = insertSort(A, n_a++, tmp);
     } else {
-        pos_stk.data[++pos_stk.top] = insertSort(B, n_b++, tmp);
+        pos_stk_b.data[++pos_stk_b.top] = insertSort(B, n_b++, tmp);
     }
     ui->te_input->clear();
     updateData();
@@ -118,15 +121,15 @@ void MainWindow::insertNum() {
 
 void MainWindow::deleteNum(int *a, int size, int p)
 {
+    if (size <= 0) return;
     for (int i = p; i < size; i++) a[i] = a[i+1];
 }
 
 void MainWindow::backNum() {
-    if (pos_stk.top <= -1) return;
-    if (ui->rb_a->isChecked()) {
-        deleteNum(A, n_a--, pos_stk.data[pos_stk.top--]);
-    } else {
-        deleteNum(B, n_b--, pos_stk.data[pos_stk.top--]);
+    if (ui->rb_a->isChecked() && n_a > 0) {
+        deleteNum(A, n_a--, pos_stk_a.data[pos_stk_a.top--]);
+    } else if (ui->rb_b->isChecked() && n_b > 0){
+        deleteNum(B, n_b--, pos_stk_b.data[pos_stk_b.top--]);
     }
     updateData();
 }
@@ -144,4 +147,11 @@ void MainWindow::on_pb_insert_clicked()
 void MainWindow::on_pb_back_clicked()
 {
     backNum();
+}
+
+void MainWindow::on_pb_sort_clicked()
+{
+    std::qsort(A, n_a, sizeof(int), cmp);
+    std::qsort(B, n_b, sizeof(int), cmp);
+    updateData();
 }
